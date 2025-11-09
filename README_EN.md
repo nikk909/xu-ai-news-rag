@@ -95,20 +95,7 @@ Frontend service runs on: http://localhost:3000 (or port configured in Vite)
 
 Open browser and visit: http://localhost:3000
 
-Login with default account:
-- **Email**: `admin@xu-news.com`
-- **Password**: `admin123456`
-
-Or register a new account (requires email service configuration).
-
-## Default Login Account
-
-The system has a pre-configured default admin account:
-
-- **Email**: `admin@xu-news.com`
-- **Password**: `admin123456`
-
-You can use this account to log in directly. (However, it is recommended to use your own email for receiving email notifications)
+Register a new account (requires email service configuration).
 
 ## Features
 
@@ -281,7 +268,6 @@ python -m unittest discover tests
 
 ## Important Notes
 
-- **Default Account**: Only for development and testing, please modify or delete in production environment
 - **Email Service**: Configuration is optional, verification code will be returned directly if not configured (development mode)
 - **Database File**: `users.db` contains sensitive user information, do not upload to Git
 - **Ollama Service**: If Ollama is not installed, the system can still run normally, but intelligent reply functionality will be unavailable, search results will still be returned
