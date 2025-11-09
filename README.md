@@ -17,7 +17,7 @@ XU-News-AI-RAG 是一个基于 RAG（检索增强生成）技术的个性化新�
 ### 后端
 - Flask 3.0
 - SQLAlchemy (ORM)
-- SQLite / MySQL (关系型数据库)
+- MySQL (关系型数据库)
 - FAISS (向量数据库)
 - sentence-transformers (文本嵌入)
 - CrossEncoder (结果重排)
@@ -34,7 +34,7 @@ XU-News-AI-RAG 是一个基于 RAG（检索增强生成）技术的个性化新�
 
 **技术说明**：
 - 本项目采用 **sentence-transformers直接实现** 的方式构建知识库，未使用LangChain框架，但实现了相同的功能（文本嵌入、向量存储、向量检索、结果重排），且性能更优。详见《技术架构文档》。
-- 数据库支持 **SQLite（开发环境）** 和 **MySQL（生产环境）**，通过环境变量配置即可切换。
+- 数据库使用 **MySQL**，通过环境变量配置。
 
 ## 快速开始
 
@@ -56,7 +56,7 @@ pip install -r requirements.txt
 **配置环境变量**（可选）：
 - 复制 `back/.env.example` 为 `back/.env`（如果存在）
 - 配置邮件服务（可选）：详见 `back/ENV配置说明.md`
-- 配置MySQL数据库（可选，默认使用SQLite）：
+- 配置MySQL数据库：
   ```env
   MYSQL_HOST=127.0.0.1
   MYSQL_PORT=3307
@@ -124,12 +124,9 @@ start.bat  # Windows
 ## 数据库
 
 ### 关系型数据库
-- **开发环境**：SQLite（默认）
-  - 数据库位置：`back/instance/users.db`
-  - 无需额外配置，自动创建
-- **生产环境**：MySQL（可选）
+- **数据库类型**：MySQL
   - 通过环境变量配置（见上方安装步骤）
-  - 使用SQLAlchemy ORM，代码无需修改
+  - 使用SQLAlchemy ORM
 
 ### 数据表
 - `users`: 用户信息表
@@ -217,7 +214,7 @@ work7/
 │   │   └── test_api.py       # API测试
 │   ├── .env                  # 环境变量（需配置）
 │   ├── instance/
-│   │   ├── users.db          # SQLite数据库
+│   │   └── (MySQL数据库)
 │   │   └── faiss_index_*/    # FAISS向量索引
 │   └── uploads/              # 上传文件目录
 │
@@ -250,7 +247,7 @@ work7/
 - 数据库自动创建（首次运行）
 - 支持热重载（debug模式）
 - 日志输出到控制台
-- 使用SQLAlchemy ORM，支持SQLite和MySQL
+- 使用SQLAlchemy ORM，使用MySQL数据库
 
 ### 前端开发
 - 支持热更新
@@ -277,7 +274,7 @@ python -m unittest discover tests
 ## 部署说明
 
 ### 开发环境
-- 使用SQLite数据库，无需额外配置
+- 使用MySQL数据库（通过环境变量配置）
 - 使用Flask开发服务器
 - 使用Vite开发服务器
 

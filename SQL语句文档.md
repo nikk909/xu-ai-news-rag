@@ -7,7 +7,7 @@
 
 - **文档名称**：SQL语句文档
 - **项目名称**：XU-News-AI-RAG：个性化新闻智能知识库
-- **数据库类型**：SQLite / MySQL
+- **数据库类型**：MySQL
 - **文档版本**：v1.0
 - **创建日期**：2025年11月9日
 - **最后更新**：2025年11月9日
@@ -16,11 +16,11 @@
 
 ## 2. 数据库说明
 
-本项目使用SQLAlchemy ORM框架，支持SQLite（开发环境）和MySQL（生产环境）两种数据库。
+本项目使用SQLAlchemy ORM框架，使用MySQL数据库。
 
-### 2.1 数据库选择
-- **开发环境**：默认使用SQLite，数据库文件位于 `back/instance/users.db`
-- **生产环境**：支持MySQL，通过环境变量配置
+### 2.1 数据库配置
+- **数据库类型**：MySQL
+- **配置方式**：通过环境变量配置（`MYSQL_HOST`、`MYSQL_PORT`、`MYSQL_USER`、`MYSQL_PASSWORD`、`MYSQL_DATABASE`）
 
 ### 2.2 数据库初始化
 数据库表通过SQLAlchemy自动创建，无需手动执行SQL语句。如需手动创建，可参考以下SQL语句。
@@ -32,21 +32,6 @@
 ### 3.1 用户表 (users)
 
 #### 3.1.1 表结构
-```sql
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,  -- MySQL: AUTO_INCREMENT
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    is_verified BOOLEAN NOT NULL DEFAULT 0,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- 创建索引
-CREATE INDEX idx_users_email ON users(email);
-```
-
-#### 3.1.2 MySQL版本
 ```sql
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -65,22 +50,6 @@ CREATE INDEX idx_users_email ON users(email);
 #### 3.2.1 表结构
 ```sql
 CREATE TABLE verification_codes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,  -- MySQL: AUTO_INCREMENT
-    email VARCHAR(255) NOT NULL,
-    code VARCHAR(6) NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expires_at DATETIME NOT NULL,
-    is_used BOOLEAN NOT NULL DEFAULT 0
-);
-
--- 创建索引
-CREATE INDEX idx_verification_codes_email ON verification_codes(email);
-CREATE INDEX idx_verification_codes_expires_at ON verification_codes(expires_at);
-```
-
-#### 3.2.2 MySQL版本
-```sql
-CREATE TABLE verification_codes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL,
     code VARCHAR(6) NOT NULL,
@@ -96,24 +65,6 @@ CREATE INDEX idx_verification_codes_expires_at ON verification_codes(expires_at)
 ### 3.3 文件元数据表 (file_metadata)
 
 #### 3.3.1 表结构
-```sql
-CREATE TABLE file_metadata (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,  -- MySQL: AUTO_INCREMENT
-    kb_name VARCHAR(255) NOT NULL,
-    filename VARCHAR(500) NOT NULL,
-    tags TEXT DEFAULT '',
-    source VARCHAR(500) DEFAULT '',
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- 创建索引
-CREATE INDEX idx_file_metadata_kb_name ON file_metadata(kb_name);
-CREATE INDEX idx_file_metadata_filename ON file_metadata(filename);
-CREATE UNIQUE INDEX idx_kb_filename ON file_metadata(kb_name, filename);
-```
-
-#### 3.3.2 MySQL版本
 ```sql
 CREATE TABLE file_metadata (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -239,15 +190,15 @@ WHERE filename LIKE '%.csv';
 ```sql
 -- 查询今天的文件
 SELECT * FROM file_metadata 
-WHERE DATE(created_at) = DATE('now');  -- MySQL: CURDATE()
+WHERE DATE(created_at) = CURDATE();
 
 -- 查询最近7天的文件
 SELECT * FROM file_metadata 
-WHERE created_at >= datetime('now', '-7 days');  -- MySQL: DATE_SUB(NOW(), INTERVAL 7 DAY)
+WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY);
 
 -- 查询最近30天的文件
 SELECT * FROM file_metadata 
-WHERE created_at >= datetime('now', '-30 days');  -- MySQL: DATE_SUB(NOW(), INTERVAL 30 DAY)
+WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY);
 ```
 
 ---
@@ -256,13 +207,7 @@ WHERE created_at >= datetime('now', '-30 days');  -- MySQL: DATE_SUB(NOW(), INTE
 
 ### 5.1 数据备份
 
-#### 5.1.1 SQLite备份
-```bash
-# 使用命令行工具备份
-sqlite3 users.db ".backup backup_users.db"
-```
-
-#### 5.1.2 MySQL备份
+#### 5.1.1 MySQL备份
 ```bash
 # 使用mysqldump备份
 mysqldump -u root -p xu_news_ai_rag > backup.sql
@@ -282,7 +227,7 @@ WHERE expires_at < CURRENT_TIMESTAMP
 -- 删除30天前注册但未验证的用户
 DELETE FROM users 
 WHERE is_verified = 0 
-  AND created_at < datetime('now', '-30 days');  -- MySQL: DATE_SUB(NOW(), INTERVAL 30 DAY)
+  AND created_at < DATE_SUB(NOW(), INTERVAL 30 DAY);
 ```
 
 ### 5.3 数据统计
@@ -311,23 +256,9 @@ ORDER BY file_count DESC;
 
 ## 6. 数据迁移SQL语句
 
-### 6.1 从SQLite迁移到MySQL
+### 6.1 数据导入
 
-#### 6.1.1 导出SQLite数据
-```bash
-sqlite3 users.db .dump > dump.sql
-```
-
-#### 6.1.2 转换SQL语句
-需要将SQLite的SQL语句转换为MySQL兼容格式：
-- `INTEGER PRIMARY KEY AUTOINCREMENT` → `INT PRIMARY KEY AUTO_INCREMENT`
-- `BOOLEAN` → `BOOLEAN` (MySQL也支持)
-- `CURRENT_TIMESTAMP` → `CURRENT_TIMESTAMP` (相同)
-- `datetime('now', '-7 days')` → `DATE_SUB(NOW(), INTERVAL 7 DAY)`
-
-### 6.2 数据导入
-
-#### 6.2.1 MySQL导入
+#### 6.1.1 MySQL导入
 ```bash
 mysql -u root -p xu_news_ai_rag < dump.sql
 ```
@@ -372,23 +303,15 @@ SELECT * FROM file_metadata WHERE tags LIKE '%keyword%';
 
 ## 8. 注意事项
 
-### 8.1 SQLite与MySQL的差异
+### 8.1 MySQL特性说明
 
-1. **自增主键**：
-   - SQLite: `AUTOINCREMENT`
-   - MySQL: `AUTO_INCREMENT`
+1. **自增主键**：使用 `AUTO_INCREMENT`
 
-2. **布尔值**：
-   - SQLite: `BOOLEAN` (实际存储为INTEGER)
-   - MySQL: `BOOLEAN` (实际为TINYINT(1))
+2. **布尔值**：`BOOLEAN` (实际为TINYINT(1))
 
-3. **日期函数**：
-   - SQLite: `datetime('now', '-7 days')`
-   - MySQL: `DATE_SUB(NOW(), INTERVAL 7 DAY)`
+3. **日期函数**：使用 `DATE_SUB(NOW(), INTERVAL 7 DAY)` 等MySQL函数
 
-4. **字符串函数**：
-   - SQLite: `LIKE` 大小写敏感（默认）
-   - MySQL: `LIKE` 大小写不敏感（默认）
+4. **字符串函数**：`LIKE` 大小写不敏感（默认）
 
 ### 8.2 安全建议
 
@@ -401,48 +324,7 @@ SELECT * FROM file_metadata WHERE tags LIKE '%keyword%';
 
 ## 9. 示例：完整数据库初始化脚本
 
-### 9.1 SQLite版本
-```sql
--- 创建用户表
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    is_verified BOOLEAN NOT NULL DEFAULT 0,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- 创建验证码表
-CREATE TABLE IF NOT EXISTS verification_codes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email VARCHAR(255) NOT NULL,
-    code VARCHAR(6) NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expires_at DATETIME NOT NULL,
-    is_used BOOLEAN NOT NULL DEFAULT 0
-);
-
--- 创建文件元数据表
-CREATE TABLE IF NOT EXISTS file_metadata (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    kb_name VARCHAR(255) NOT NULL,
-    filename VARCHAR(500) NOT NULL,
-    tags TEXT DEFAULT '',
-    source VARCHAR(500) DEFAULT '',
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(kb_name, filename)
-);
-
--- 创建索引
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_verification_codes_email ON verification_codes(email);
-CREATE INDEX IF NOT EXISTS idx_file_metadata_kb_name ON file_metadata(kb_name);
-CREATE INDEX IF NOT EXISTS idx_file_metadata_filename ON file_metadata(filename);
-```
-
-### 9.2 MySQL版本
+### 9.1 MySQL版本
 ```sql
 -- 创建数据库（如不存在）
 CREATE DATABASE IF NOT EXISTS xu_news_ai_rag 

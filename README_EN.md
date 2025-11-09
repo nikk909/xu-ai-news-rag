@@ -17,7 +17,7 @@ XU-News-AI-RAG is a personalized news intelligent knowledge base system based on
 ### Backend
 - Flask 3.0
 - SQLAlchemy (ORM)
-- SQLite / MySQL (Relational Database)
+- MySQL (Relational Database)
 - FAISS (Vector Database)
 - sentence-transformers (Text Embedding)
 - CrossEncoder (Result Reranking)
@@ -34,7 +34,7 @@ XU-News-AI-RAG is a personalized news intelligent knowledge base system based on
 
 **Technical Notes**:
 - This project uses **sentence-transformers direct implementation** to build the knowledge base, without using the LangChain framework. However, it implements the same functionality (text embedding, vector storage, vector retrieval, result reranking) with better performance. See "Technical Architecture Document" for details.
-- Database supports **SQLite (development environment)** and **MySQL (production environment)**, can be switched via environment variables.
+- Database uses **MySQL**, configured via environment variables.
 
 ## Quick Start
 
@@ -56,7 +56,7 @@ pip install -r requirements.txt
 **Configure Environment Variables** (Optional):
 - Copy `back/.env.example` to `back/.env` (if exists)
 - Configure email service (optional): See `back/ENV配置说明.md`
-- Configure MySQL database (optional, defaults to SQLite):
+- Configure MySQL database:
   ```env
   MYSQL_HOST=127.0.0.1
   MYSQL_PORT=3307
@@ -124,12 +124,9 @@ Register a new account (requires email service configuration).
 ## Database
 
 ### Relational Database
-- **Development Environment**: SQLite (default)
-  - Database location: `back/instance/users.db`
-  - No additional configuration required, auto-created
-- **Production Environment**: MySQL (optional)
+- **Database Type**: MySQL
   - Configure via environment variables (see installation steps above)
-  - Uses SQLAlchemy ORM, no code changes needed
+  - Uses SQLAlchemy ORM
 
 ### Data Tables
 - `users`: User information table
@@ -217,7 +214,7 @@ work7/
 │   │   └── test_api.py       # API tests
 │   ├── .env                  # Environment variables (needs configuration)
 │   ├── instance/
-│   │   ├── users.db          # SQLite database
+│   │   └── (MySQL database)
 │   │   └── faiss_index_*/    # FAISS vector indexes
 │   └── uploads/              # Uploaded files directory
 │
@@ -250,7 +247,7 @@ work7/
 - Database auto-created (first run)
 - Supports hot reload (debug mode)
 - Logs output to console
-- Uses SQLAlchemy ORM, supports SQLite and MySQL
+- Uses SQLAlchemy ORM, uses MySQL database
 
 ### Frontend Development
 - Supports hot update
@@ -277,7 +274,7 @@ python -m unittest discover tests
 ## Deployment Instructions
 
 ### Development Environment
-- Use SQLite database, no additional configuration required
+- Use MySQL database (configure via environment variables)
 - Use Flask development server
 - Use Vite development server
 

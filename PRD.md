@@ -247,7 +247,7 @@
 ### 5.6 兼容性需求
 - **浏览器兼容**：支持Chrome、Firefox、Edge等主流浏览器
 - **操作系统兼容**：支持Windows、Linux、macOS等主流操作系统
-- **数据库兼容**：支持MySQL 5.7+、SQLite 3.x等版本
+- **数据库兼容**：支持MySQL 5.7+版本
 
 ---
 
@@ -338,7 +338,7 @@
 ### A. 技术栈选型
 - **前端框架**：React 18 + Vite
 - **后端框架**：Flask 3.0
-- **关系型数据库**：SQLite（开发环境）/ MySQL（生产环境，可选）
+- **关系型数据库**：MySQL
 - **向量数据库**：FAISS
 - **文本嵌入**：sentence-transformers (all-MiniLM-L6-v2)
 - **重排模型**：CrossEncoder (ms-marco-MiniLM-L-6-v2)
@@ -347,12 +347,11 @@
 
 **说明**：
 - **LangChain框架**：本项目未使用LangChain框架，而是采用sentence-transformers直接实现的方式。虽然未使用LangChain，但实现了相同的功能（文本嵌入、向量存储、向量检索、结果重排），且性能更优、代码更直观。详见《技术架构文档》。
-- **数据库选型**：开发环境默认使用SQLite，无需额外配置；生产环境支持MySQL，通过环境变量配置即可切换。使用SQLAlchemy ORM，代码无需修改。
+- **数据库选型**：使用MySQL数据库，通过环境变量配置。使用SQLAlchemy ORM。
 
 ### B. 数据存储设计
-- **元数据存储**：关系型数据库（SQLite/MySQL），存储数据ID、数据类型、来源、时间等元数据
-  - 开发环境：SQLite（`back/instance/users.db`）
-  - 生产环境：MySQL（通过环境变量配置）
+- **元数据存储**：关系型数据库（MySQL），存储数据ID、数据类型、来源、时间等元数据
+  - 通过环境变量配置MySQL连接
 - **向量数据存储**：FAISS向量数据库，存储文本向量数据
   - 存储位置：`back/instance/faiss_index_<知识库名称>/`
   - 索引文件：`index.faiss`（向量索引）
