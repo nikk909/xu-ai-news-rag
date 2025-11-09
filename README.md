@@ -324,3 +324,11 @@ python -m unittest discover tests
 
 本项目为培训考核项目，仅供学习使用。
 
+---
+
+## English Documentation
+
+For English documentation, please see [README_EN.md](README_EN.md)
+
+**Repository**: https://github.com/nikk909/xu-ai-news-rag
+
